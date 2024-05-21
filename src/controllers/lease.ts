@@ -4,7 +4,6 @@ import { LeaseSchema } from "../schemas/lease";
 import { BadRequestsException } from "../exceptions/bad-requests";
 import { ErrorCode } from "../exceptions/root";
 
-// Create Lease Function
 export const createLease = async (
   req: Request,
   res: Response,
@@ -60,21 +59,33 @@ export const createLease = async (
   res.json(lease);
 };
 
-// Fetch All Leases Function
 export const fetchAllLeases = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const leases = await prismaClient.lease.findMany();
+    const user = req.user!;
+
+    // Fetch leases of properties belonging to the logged-in user
+    const leases = await prismaClient.lease.findMany({
+      where: {
+        listing: {
+          listingCreatedById: user.id,
+        },
+      },
+      include: {
+        listing: true,
+        user: true,
+      },
+    });
+
     res.json(leases);
   } catch (error) {
     next(error);
   }
 };
 
-// Fetch Lease by ID Function
 export const fetchLeaseById = async (
   req: Request,
   res: Response,
@@ -101,7 +112,6 @@ export const fetchLeaseById = async (
   }
 };
 
-// Delete Lease Function
 export const deleteLease = async (
   req: Request,
   res: Response,
@@ -130,6 +140,29 @@ export const deleteLease = async (
     });
 
     res.json({ message: "Lease deleted successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const fetchLeasesByUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const user = req.user!;
+
+    const leases = await prismaClient.lease.findMany({
+      where: {
+        userId: user.id,
+      },
+      include: {
+        listing: true,
+      },
+    });
+
+    res.json(leases);
   } catch (error) {
     next(error);
   }
