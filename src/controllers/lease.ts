@@ -3,6 +3,7 @@ import { prismaClient } from "../db/prisma";
 import { LeaseSchema } from "../schemas/lease";
 import { BadRequestsException } from "../exceptions/bad-requests";
 import { ErrorCode } from "../exceptions/root";
+import { createLeaseOnBlockchain } from "../utils/bblockchain";
 
 export const createLease = async (
   req: Request,
@@ -12,7 +13,7 @@ export const createLease = async (
   // Validate the incoming lease data
   LeaseSchema.parse(req.body);
   const user = req.user!;
-  const { listingId } = req.body;
+  const { listingId, leaseInfo } = req.body;
 
   // Check if the user already has an active lease
   const existingLease = await prismaClient.lease.findFirst({
@@ -52,11 +53,26 @@ export const createLease = async (
   const lease = await prismaClient.lease.create({
     data: {
       userId: user.id,
-      ...req.body,
+      listingId: listingId,
+      leaseInfo: leaseInfo,
     },
   });
 
-  res.json(lease);
+  // const { propertyDetails, leaseTerms, startDate, endDate } = leaseInfo;
+  // const transactionHash = await createLeaseOnBlockchain(
+  //   user.id,
+  //   propertyDetails,
+  //   leaseTerms,
+  //   startDate,
+  //   endDate
+  // );
+  // console.log("te", transactionHash);
+
+  res.json({
+    success: "Lease created successfully",
+    lease,
+    // transactionHash,
+  });
 };
 
 export const fetchAllLeases = async (

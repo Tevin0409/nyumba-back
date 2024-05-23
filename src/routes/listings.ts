@@ -19,7 +19,7 @@ listingRoutes.post(
 );
 listingRoutes.get("/fetch-listings", errorHandler(fetchAllListings));
 listingRoutes.get(
-  "/fetch-listings/user/",
+  "/fetch-listings/user",
   [authMiddleware],
   errorHandler(fetchUserListings)
 );

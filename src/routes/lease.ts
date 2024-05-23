@@ -22,7 +22,7 @@ leasingRoutes.get(
   errorHandler(fetchAllLeases)
 );
 leasingRoutes.get(
-  "/fetch-lease/user/",
+  "/fetch-lease/user",
   [authMiddleware],
   errorHandler(fetchLeasesByUser)
 );
